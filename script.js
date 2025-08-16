@@ -16,9 +16,9 @@ function theme() {
     const darkBtn = document.getElementById('darkBtn');
     const lightBtn = document.getElementById('lightBtn');
 
-    document.body.classList.toggle('light');
+    document.body.classList.toggle('darkBtn');
 
-    if (document.body.classList.contains('light')) {
+    if (document.body.classList.contains('darkBtn')) {
         darkBtn.style.display = 'block';
         lightBtn.style.display = 'none';
     } else {
