@@ -19,11 +19,11 @@ function theme() {
     document.body.classList.toggle('darkBtn');
 
     if (document.body.classList.contains('darkBtn')) {
-        darkBtn.style.display = 'block';
-        lightBtn.style.display = 'none';
+        darkBtn.style.display = 'none';
+        lightBtn.style.display = 'block';
     } else {
-         darkBtn.style.display = 'none';
-         lightBtn.style.display = 'block';
+         darkBtn.style.display = 'block';
+         lightBtn.style.display = 'none';
     }
 }
 
