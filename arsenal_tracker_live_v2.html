@@ -73,10 +73,47 @@ body{background:#08080f;font-family:'Barlow',sans-serif;color:#fff}
 .card:hover .cholo{opacity:1}
 .ccontent{position:relative;z-index:4;height:100%;display:flex;flex-direction:column;padding:12px 10px 10px}
 .cnum{font-family:'Bebas Neue',sans-serif;font-size:10px;letter-spacing:2px;color:rgba(255,255,255,.28);text-align:right}
-.csil{flex:1;display:flex;align-items:center;justify-content:center;position:relative}
+.csil{
+    flex:1;
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+    position:relative;
+    overflow:hidden;
+    padding-top:10px;
+}
 .sring{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);display:flex;align-items:center;justify-content:center;position:relative}
 .sring svg{width:40px;height:40px}
 .pglow{position:absolute;inset:-8px;border-radius:50%;background:radial-gradient(circle,rgba(76,255,143,.12),transparent)}
+.pflare{
+    position:absolute;
+    width:140px;
+    height:140px;
+    border-radius:50%;
+    background:radial-gradient(circle,
+        rgba(255,255,255,.15),
+        transparent 70%);
+    filter:blur(10px);
+    z-index:1;
+}
+
+.pimg{
+    height:95%;
+    width:auto;
+    object-fit:contain;
+    position:relative;
+    z-index:3;
+
+    filter:
+        drop-shadow(0 0 10px rgba(0,0,0,.5))
+        drop-shadow(0 0 18px rgba(255,255,255,.08));
+
+    transition:transform .3s ease;
+}
+
+.card:hover .pimg{
+    transform:scale(1.05);
+}
 .crating{position:absolute;top:0;left:0;font-family:'Bebas Neue',sans-serif;font-size:26px;line-height:1;color:rgba(255,255,255,.9)}
 .cratinglbl{position:absolute;top:28px;left:1px;font-family:'Barlow Condensed',sans-serif;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.35)}
 .cpos{position:absolute;top:0;right:0;font-family:'Bebas Neue',sans-serif;font-size:11px;letter-spacing:1px;padding:3px 6px;border-radius:2px;background:rgba(255,255,255,.09);color:rgba(255,255,255,.6)}
@@ -249,6 +286,9 @@ const ARSENAL_SQUAD = [
 ];
 
 const STATUS_COLOR = {playing:'#4cff8f',benched:'#f5a623',injured:'#ff3333',nomatch:'#555'};
+const PLAYER_IMAGES = {
+  'Saka': 'assets/players/saka.png'
+};
 const ARSENAL_TEAM_ID = 13;
 const PL_LEAGUE_ID = 2;
 
@@ -363,31 +403,7 @@ async function loadPremierLeagueMode(td) {
 
   if (!arsenalMatch) {
     document.getElementById('infoBannerWrap').innerHTML = `<div class="infobanner">Arsenal have no Premier League match today. Showing squad availability status — next fixture data will appear on matchday.</div>`;
-    allCards = await Promise.all(
-      ARSENAL_SQUAD.map(async p => {
-
-        const season = await getSeasonStats(p.name);
-
-        return {
-          ...p,
-          status:'nomatch',
-
-          goals: season?.goals || 0,
-          assists: season?.assists || 0,
-          mins: 0,
-          shots: 0,
-          passes: 0,
-          rating: season?.rating || null,
-          incidents: [],
-          eventInfo: null,
-
-          seasonApps: season?.apps || 0,
-          seasonGoals: season?.goals || 0,
-          seasonAssists: season?.assists || 0
-        };
-
-      })
-    );
+    allCards = ARSENAL_SQUAD.map(p => ({...p, status:'nomatch', goals:0, assists:0, mins:0, shots:0, passes:0, rating:null, incidents:[], eventInfo:null}));
     return;
   }
 
@@ -412,31 +428,6 @@ async function getIncidents(id) {
   if (incidentCache[id]) return incidentCache[id];
   try { const d = await get(`/events/${id}/incidents/`); const inc = d.incidents || []; incidentCache[id] = inc; return inc; } catch(e) { return []; }
 }
-
-async function getSeasonStats(playerName) {
-  try {
-
-    const res = await get(`/players/?search=${encodeURIComponent(playerName)}`);
-
-    const player = (res.results || res)[0];
-
-    if (!player) return null;
-
-    const stats = await get(`/players/${player.id}/stats/`);
-
-    return {
-      apps: stats.matches || 0,
-      goals: stats.goals || 0,
-      assists: stats.assists || 0,
-      rating: stats.rating || null
-    };
-
-  } catch(err) {
-    console.log('stats error', playerName, err);
-    return null;
-  }
-}
-
 
 async function buildPlayerCards(squad, events, matchFn, wcSquads) {
   return Promise.all(squad.map(async p => {
@@ -484,23 +475,7 @@ async function buildPlayerCards(squad, events, matchFn, wcSquads) {
       }
     }
 
-    return {
-      ...p,
-      status,
-      goals,
-      assists,
-      mins,
-      shots,
-      passes,
-      rating,
-      incidents,
-      eventInfo,
-
-      seasonApps: 0,
-      seasonGoals: 0,
-      seasonAssists: 0,
-      seasonRating: null
-    };
+    return {...p, status, goals, assists, mins, shots, passes, rating, incidents, eventInfo};
   }));
 }
 
@@ -547,14 +522,21 @@ function renderCards() {
         <div class="cbg"></div><div class="cstripe"></div><div class="cholo"></div>
         <div class="ccontent">
           <div class="cnum">#${p.num}</div>
-          <div class="csil">
-            ${p.status==='playing'?'<div class="pglow"></div>':''}
-            <div class="sring">
-              <svg viewBox="0 0 44 44" fill="none">
-                <circle cx="22" cy="14" r="7" fill="rgba(255,255,255,.22)"/>
-                <path d="M8 42C8 30 36 30 36 42" fill="rgba(255,255,255,.18)"/>
-              </svg>
-            </div>
+         <div class="csil">
+  <div class="pflare"></div>
+
+  ${
+    PLAYER_IMAGES[p.short]
+      ? `<img class="pimg" src="${PLAYER_IMAGES[p.short]}" alt="${p.name}">`
+      : `
+        <div class="sring">
+          <svg viewBox="0 0 44 44" fill="none">
+            <circle cx="22" cy="14" r="7" fill="rgba(255,255,255,.22)"/>
+            <path d="M8 42C8 30 36 30 36 42" fill="rgba(255,255,255,.18)"/>
+          </svg>
+        </div>
+      `
+  }
             <div class="crating">${rdisp}</div>
             <div class="cratinglbl">Rating</div>
             <div class="cpos">${p.pos}</div>
@@ -564,49 +546,9 @@ function renderCards() {
             <div class="cnation">${mode==='worldcup' ? p.nation : 'Arsenal FC'}</div>
             <span class="cspill ${p.status}">${statusLabel}</span>
             <div class="cstatrow">
-
-              ${
-                p.status === 'nomatch'
-
-                ? `
-
-                  <div class="cstat">
-                    <div class="cstatv">${p.seasonApps || 0}</div>
-                    <div class="cstatk">Apps</div>
-                  </div>
-
-                  <div class="cstat">
-                    <div class="cstatv">${p.seasonGoals || 0}</div>
-                    <div class="cstatk">Gls</div>
-                  </div>
-
-                  <div class="cstat">
-                    <div class="cstatv">${p.seasonAssists || 0}</div>
-                    <div class="cstatk">Ast</div>
-                  </div>
-
-                `
-
-                : `
-
-                  <div class="cstat">
-                    <div class="cstatv">${p.goals}</div>
-                    <div class="cstatk">Gls</div>
-                  </div>
-
-                  <div class="cstat">
-                    <div class="cstatv">${p.assists}</div>
-                    <div class="cstatk">Ast</div>
-                  </div>
-
-                  <div class="cstat">
-                    <div class="cstatv">${mdisp}</div>
-                    <div class="cstatk">Mins</div>
-                  </div>
-
-                `
-              }
-
+              <div class="cstat"><div class="cstatv">${p.goals}</div><div class="cstatk">Gls</div></div>
+              <div class="cstat"><div class="cstatv">${p.assists}</div><div class="cstatk">Ast</div></div>
+              <div class="cstat"><div class="cstatv">${mdisp}</div><div class="cstatk">Mins</div></div>
             </div>
           </div>
         </div>
