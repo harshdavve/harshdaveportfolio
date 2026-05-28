@@ -554,7 +554,7 @@ function renderCards() {
     const card = document.createElement('div');
     card.className = `card ${p.status}${p.gold?' gold':''}`;
     card.onclick = () => openModal(p);
-    const rdisp = p.rating ? p.rating.toFixed(1) : '—';
+    const rdisp = p.rating ? Number(p.rating).toFixed(1) : '—';
     const mdisp = p.mins > 0 ? `${Math.round(p.mins)}'` : '—';
     const statusLabel = {playing:'Playing',benched:'Benched',injured:'Injured',nomatch:'No Match'}[p.status];
     card.innerHTML = `
