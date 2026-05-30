@@ -1094,10 +1094,10 @@ async function generateTweets() {
   const customCtx = document.getElementById('customContext').value.trim();
 
   const toneGuide = {
-    hype: 'write it like a human. ultra hype, passionate fan energy — use CAPS for key moments, multiple emojis, exclamation marks, dramatic phrasing. Write like someone screaming at their TV. Pack in the drama, the stakes, the emotion. Reference specific stats and players to make it feel real.',
-    analytical: 'write it like a human. sharp tactical analyst — dig into the xG numbers, possession patterns, shot locations, pressing stats. Explain WHY a team is dominating or struggling. Use specific numbers. Write like a football analytics journalist breaking down what the data really means right now.',
-    funny: 'write it like a human. hilarious football banter — sharp wit, unexpected comparisons, relatable fan suffering or joy, absurdist observations about what is happening. Reference the specific match stats in a funny way. Think viral football Twitter humour. Make it genuinely laugh-out-loud.',
-    pundit: 'write it like a human. authoritative TV pundit — make a bold, specific claim about the match narrative, back it with stats, add tactical insight. Sounds like Gary Neville or Jamie Carragher mid-match. Confident, opinionated, detailed.'
+    hype: 'ultra hype, passionate fan energy — use CAPS for key moments, multiple emojis, exclamation marks, dramatic phrasing. Write like someone screaming at their TV. Pack in the drama, the stakes, the emotion. Reference specific stats and players to make it feel real.',
+    analytical: 'sharp tactical analyst — dig into the xG numbers, possession patterns, shot locations, pressing stats. Explain WHY a team is dominating or struggling. Use specific numbers. Write like a football analytics journalist breaking down what the data really means right now.',
+    funny: 'hilarious football banter — sharp wit, unexpected comparisons, relatable fan suffering or joy, absurdist observations about what is happening. Reference the specific match stats in a funny way. Think viral football Twitter humour. Make it genuinely laugh-out-loud.',
+    pundit: 'authoritative TV pundit — make a bold, specific claim about the match narrative, back it with stats, add tactical insight. Sounds like Gary Neville or Jamie Carragher mid-match. Confident, opinionated, detailed.'
   };
 
   const matchData = `
@@ -1512,29 +1512,67 @@ ${customCtx ? 'Additional context: ' + customCtx : ''}
     pundit: 'authoritative pundit — bold verdict on the performance, backed by specific numbers.'
   };
 
+  // Position-aware priority stats — tell the AI what matters most for this role
+  const positionContext = {
+    F: `This is a FORWARD. Priority stats in order of importance:
+1. Goals, Assists, xG, xA — these are the most important. Even 1 goal or assist is a headline stat.
+2. Shots & shots on target — shows threat level
+3. Key passes — creative contribution
+4. Dribbles, was fouled — attacking dynamism
+Defensive stats (tackles, interceptions) are LOW PRIORITY for a forward — only mention if truly exceptional (3+).
+NEVER lead with defensive stats for a forward if they have goals/assists/xG to talk about.`,
+    M: `This is a MIDFIELDER. Priority stats in order of importance:
+1. Goals and assists first if any — always headline these
+2. Key passes, xA — creative output
+3. Pass volume and accuracy — engine room contribution
+4. Ball recoveries, interceptions — pressing and work rate
+5. Tackles, duels — defensive midfield work
+Balance attack and defence based on what stands out most in the numbers.`,
+    D: `This is a DEFENDER. Priority stats in order of importance:
+1. Goals or assists — always lead with these if present, they are exceptional for a defender
+2. Clearances, tackles won, interceptions — defensive solidity
+3. Aerials won — especially important for centre-backs
+4. Ball recoveries, duels won
+5. Passes and pass accuracy — playing out from the back
+xG and shots are LOW PRIORITY unless the defender scored or had a clear chance.`,
+    G: `This is a GOALKEEPER. Priority stats in order of importance:
+1. Saves and save percentage — most important
+2. Goals conceded vs xG faced — did they over or underperform?
+3. Penalty saves — always a highlight
+4. Passes and long balls — distribution
+5. Sweeper-keeper actions — clearances outside box
+Attacking stats are irrelevant for a goalkeeper.`
+  };
+
+  const posGuide = positionContext[p.position] || `Use all stats equally, prioritise goals and assists if present.`;
+
   const prompt = `You are an expert football tweet writer. Generate 4 tweets focused on this specific player's performance.
 
 PLAYER DATA:
 ${playerData}
 
+POSITION GUIDANCE — READ THIS CAREFULLY:
+${posGuide}
+
 TONE: ${toneGuide[currentTone]}
 
 Generate exactly 4 tweets, each a different TYPE:
-1. TYPE "rating" — overall verdict on the player's performance with their rating and 2-3 key stats
-2. TYPE "attack" — focused on their attacking contribution: goals, xG, shots, key passes, assists
-3. TYPE "defense" — focused on their defensive/physical work: tackles, interceptions, aerials, duels
-4. TYPE "moment" — pick the single most interesting or surprising stat about this player and build a tweet around it
+1. TYPE "rating" — overall verdict on the player's performance. Lead with their most impactful stats for their position (see guidance above). Include rating if available.
+2. TYPE "key" — deep dive into the 1-2 stats that define their game today. For a forward this might be goals+xG. For a midfielder it might be assists+key passes. For a defender it might be clearances+aerials. ALWAYS prioritise the stats that matter for their position.
+3. TYPE "full picture" — a complete summary tweet covering both their strengths AND any weaknesses in this game (dispossessed, duel losses, poor pass accuracy etc). Balance it.
+4. TYPE "moment" — pick the single most surprising, exceptional or context-making stat and build a tweet around WHY it matters in the context of this specific match result.
 
 CRITICAL RULES:
 - Each tweet MUST be 200-270 characters. Use the full space.
 - NO hashtags
+- NEVER ignore goals or assists to talk about a less important stat
 - Use specific numbers — never be vague
 - Every tweet must make a point or tell a story about this player
 - Reference the match context (score, opponent) to give it meaning
 - Sound like a real football fan or journalist, not a bot
 
 Respond ONLY with a JSON array:
-[{"type":"rating","text":"..."},{"type":"attack","text":"..."},{"type":"defense","text":"..."},{"type":"moment","text":"..."}]`;
+[{"type":"rating","text":"..."},{"type":"key","text":"..."},{"type":"full picture","text":"..."},{"type":"moment","text":"..."}]`;
 
   try {
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
