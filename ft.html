@@ -840,6 +840,32 @@
 </head>
 <body>
 
+  <script>
+async function checkPassword() {
+    const enteredPassword = prompt("Enter Password:");
+
+    const encoder = new TextEncoder();
+    const data = encoder.encode(enteredPassword);
+    const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hash = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+
+    const correctHash = "af6a5c2dc9e1204419891942266c310d4b7e07fac37a22377fc20ef356918a3a";
+
+    if (hash === correctHash) {
+        document.getElementById("content").style.display = "block";
+    } else {
+        document.body.innerHTML = "<h1>Access Denied</h1>";
+    }
+}
+
+checkPassword();
+</script>
+<div id="content" style="display:none;">
+   
+
+
 <div class="header">
   <div class="logo">⚡ tweet<span>churn</span></div>
   <div class="badge live" id="liveBadge" style="display:none">● live</div>
@@ -1821,5 +1847,6 @@ Respond ONLY with a JSON array:
   }
 }
 </script>
+</div>
 </body>
 </html>
