@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club World Cup Tracker</title>
+    <link rel="stylesheet" href="wc/style.css">
+    <link href="/wt.png" rel="icon" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- Background animation — balls on kick trajectories -->
+<div class="bg-pitch" aria-hidden="true">
+    <div class="pitch-lines"></div>
+    <span class="ball b1">⚽</span>
+    <span class="ball b2">⚽</span>
+    <span class="ball b3">⚽</span>
+    <span class="ball b4">⚽</span>
+    <span class="ball b5">⚽</span>
+</div>
+
+<div id="app">
+
+    <div class="hero">
+        <div class="hero-badge">FIFA CLUB WORLD CUP 2025</div>
+        <h1>World Cup<br>Tracker</h1>
+        <p>Follow your club's players through the tournament</p>
+    </div>
+
+    <div class="search-container">
+        <input
+            type="text"
+            id="clubSearch"
+            placeholder="Search any club..."
+            autocomplete="off"
+        >
+    </div>
+
+    <h2 class="section-title">Popular Clubs</h2>
+
+    <div id="clubGrid"></div>
+
+    <div id="dashboard"></div>
+
+</div>
+
+<script src="wc/data/clubs.js"></script>
+<script src="wc/app.js"></script>
+
+</body>
+</html>
