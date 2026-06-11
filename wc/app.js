@@ -294,6 +294,35 @@ const nationsRepresented = [
     )
 ].length;
 
+// If no one is playing tomorrow, find the next upcoming match date
+let nextMatchLabel = "Playing Tomorrow";
+let nextMatchDisplay = playersPlayingSoon;
+
+if (playersPlayingSoon === 0) {
+
+    const upcomingDates = sortedPlayers
+        .map(player =>
+            nextFixtureByTeam[player.national_team_id]
+        )
+        .filter(Boolean)
+        .map(f => new Date(f.event_date));
+
+    if (upcomingDates.length > 0) {
+
+        const soonest = new Date(
+            Math.min(...upcomingDates)
+        );
+
+        nextMatchLabel = "Next Match";
+        nextMatchDisplay = soonest.toLocaleDateString(
+            [],
+            { day: "numeric", month: "short" }
+        );
+
+    }
+
+}
+
 dashboard.innerHTML = `
     <h2>${club.name} World Cup Tracker</h2>
 
@@ -319,10 +348,10 @@ dashboard.innerHTML = `
 
         <div class="summary-card">
             <div class="summary-number">
-                ${playersPlayingSoon}
+                ${nextMatchDisplay}
             </div>
             <div class="summary-label">
-                Playing Tomorrow
+                ${nextMatchLabel}
             </div>
         </div>
 
