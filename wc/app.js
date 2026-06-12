@@ -595,11 +595,23 @@ sortedPlayers.forEach(player => {
 
     }
 
+    const availability =
+        (player.availability || "").toLowerCase();
+
+    const availabilityHTML =
+        availability === "unavailable"
+            ? `<span class="availability-badge unavailable">🚫 Unavailable</span>`
+        : availability === "doubtful"
+            ? `<span class="availability-badge doubtful">⚠️ Doubtful</span>`
+        : "";
+
     card.innerHTML = `
         <h3>
             ${FLAGS[player.nationality] || "🌍"}
             ${player.name}
         </h3>
+
+        ${availabilityHTML}
 
         <p>
             ${player.specific_position}
