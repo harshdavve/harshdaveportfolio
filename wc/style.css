@@ -495,6 +495,28 @@ body {
     color: var(--muted);
 }
 
+/* ── Footer ─────────────────────────────────────── */
+ 
+.app-footer {
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--muted);
+}
+ 
+.app-footer a {
+    color: var(--green);
+    text-decoration: none;
+    font-weight: 600;
+    transition: color var(--transition);
+}
+ 
+.app-footer a:hover {
+    color: var(--text);
+}
+
 /* ── Responsive ─────────────────────────────────── */
 
 @media (max-width: 420px) {
