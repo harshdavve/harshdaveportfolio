@@ -390,7 +390,7 @@ worldCupPlayers.forEach(player => {
 
     playersByNationalTeam[
         player.national_team_id
-    ].push(player);
+    ].push(player.name);
 
 });
 
@@ -415,21 +415,6 @@ nextFiveFixtures.forEach(match => {
         ...homePlayers,
         ...awayPlayers
     ];
-
-    const fixturePlayersHTML =
-        fixturePlayers
-            .map(p => {
-                const av =
-                    (p.availability || "").toLowerCase();
-                const badge =
-                    av === "unavailable"
-                        ? `<span class="availability-badge unavailable">🚫</span>`
-                    : av === "doubtful"
-                        ? `<span class="availability-badge doubtful">⚠️</span>`
-                    : "";
-                return `<span class="fixture-player-name">${p.name}${badge}</span>`;
-            })
-            .join(", ");
 
     const fixtureCard =
         document.createElement("div");
@@ -459,7 +444,7 @@ nextFiveFixtures.forEach(match => {
         </div>
 
         <div class="fixture-players">
-            👥 ${fixturePlayersHTML}
+            👥 ${fixturePlayers.join(", ")}
         </div>
 
         <button
