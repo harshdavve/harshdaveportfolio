@@ -422,10 +422,10 @@ nextFiveFixtures.forEach(match => {
                 const av =
                     (p.availability || "").toLowerCase();
                 const badge =
-                    av === "unavailable"
-                        ? `<span class="availability-badge unavailable">🚫</span>`
+                    av === "injured"
+                        ? `<span class="availability-badge unavailable">🚫 Injured</span>`
                     : av === "doubtful"
-                        ? `<span class="availability-badge doubtful">⚠️</span>`
+                        ? `<span class="availability-badge doubtful">⚠️ Doubtful</span>`
                     : "";
                 return `<span class="fixture-player-name">${p.name}${badge}</span>`;
             })
@@ -614,8 +614,8 @@ sortedPlayers.forEach(player => {
         (player.availability || "").toLowerCase();
 
     const availabilityHTML =
-        availability === "unavailable"
-            ? `<span class="availability-badge unavailable">🚫 Unavailable</span>`
+        availability === "injured"
+            ? `<span class="availability-badge unavailable">🚫 Injured</span>`
         : availability === "doubtful"
             ? `<span class="availability-badge doubtful">⚠️ Doubtful</span>`
         : "";
