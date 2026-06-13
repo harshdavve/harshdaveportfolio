@@ -517,6 +517,9 @@ body {
     color: var(--text);
 }
 
+ 
+/* ── Availability badges ─────────────────────────── */
+ 
 .availability-badge {
     display: inline-block;
     font-size: 0.72rem;
@@ -525,19 +528,29 @@ body {
     border-radius: 999px;
     letter-spacing: 0.3px;
 }
-
+ 
 .availability-badge.doubtful {
     background: rgba(245, 197, 24, 0.12);
     border: 1px solid rgba(245, 197, 24, 0.3);
     color: #f5c518;
 }
-
+ 
 .availability-badge.unavailable {
     background: rgba(239, 68, 68, 0.1);
     border: 1px solid rgba(239, 68, 68, 0.25);
     color: #f87171;
 }
-
+ 
+.fixture-player-name {
+    white-space: nowrap;
+}
+ 
+.fixture-player-name .availability-badge {
+    font-size: 0.65rem;
+    padding: 1px 5px;
+    margin-left: 4px;
+    vertical-align: middle;
+}
 /* ── Responsive ─────────────────────────────────── */
 
 @media (max-width: 420px) {
