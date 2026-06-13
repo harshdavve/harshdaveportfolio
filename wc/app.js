@@ -25,6 +25,12 @@ const FLAGS = {
     Croatia:"🇭🇷"
 };
 
+// Players to exclude from the tracker (e.g. season-ending injuries)
+// Add or remove player IDs as needed
+const EXCLUDED_PLAYER_IDS = [
+    453  // Jurriën Timber
+];
+
 // Register service worker for push notifications
 if ("serviceWorker" in navigator) {
     navigator.serviceWorker
@@ -418,17 +424,7 @@ nextFiveFixtures.forEach(match => {
 
     const fixturePlayersHTML =
         fixturePlayers
-            .map(p => {
-                const av =
-                    (p.availability || "").toLowerCase();
-                const badge =
-                    av === "injured"
-                        ? `<span class="availability-badge unavailable">🚫 Injured</span>`
-                    : av === "doubtful"
-                        ? `<span class="availability-badge doubtful">⚠️ Doubtful</span>`
-                    : "";
-                return `<span class="fixture-player-name">${p.name}${badge}</span>`;
-            })
+            .map(p => p.name)
             .join(", ");
 
     const fixtureCard =
@@ -610,23 +606,11 @@ sortedPlayers.forEach(player => {
 
     }
 
-    const availability =
-        (player.availability || "").toLowerCase();
-
-    const availabilityHTML =
-        availability === "injured"
-            ? `<span class="availability-badge unavailable">🚫 Injured</span>`
-        : availability === "doubtful"
-            ? `<span class="availability-badge doubtful">⚠️ Doubtful</span>`
-        : "";
-
     card.innerHTML = `
         <h3>
             ${FLAGS[player.nationality] || "🌍"}
             ${player.name}
         </h3>
-
-        ${availabilityHTML}
 
         <p>
             ${player.specific_position}
@@ -647,7 +631,9 @@ sortedPlayers.forEach(player => {
 function getWorldCupPlayers(players) {
 
     return players.filter(
-        player => player.national_team_id !== null
+        player =>
+            player.national_team_id !== null &&
+            !EXCLUDED_PLAYER_IDS.includes(player.id)
     );
 
 }
