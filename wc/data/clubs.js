@@ -4,6 +4,7 @@ const CLUBS = [
     teamId:18
 },
 { name: "Real Madrid", teamId: 57 },
+{ name: "Leeds United", teamId: 18 },
 { name: "Barcelona", teamId: 44 },
 { name: "Manchester United", teamId: 17 },
 { name: "Bayern Munich", teamId: 79 },
