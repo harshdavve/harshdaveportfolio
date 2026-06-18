@@ -64,155 +64,6 @@ function syncNotificationsToSW() {
 
 }
 
-// ── Add to Home Screen nudge ─────────────────────
-
-let deferredA2HSPrompt = null;
-
-window.addEventListener("beforeinstallprompt", e => {
-    e.preventDefault();
-    deferredA2HSPrompt = e;
-    setTimeout(showA2HSBanner, 3500);
-});
-
-window.addEventListener("DOMContentLoaded", () => {
-    if (isIOS() && !isInStandaloneMode()) {
-        setTimeout(showA2HSBanner, 3500);
-    }
-});
-
-function isIOS() {
-    return (
-        /iphone|ipad|ipod/.test(
-            navigator.userAgent.toLowerCase()
-        ) && !window.MSStream
-    );
-}
-
-function isInStandaloneMode() {
-    return (
-        window.matchMedia("(display-mode: standalone)").matches ||
-        window.navigator.standalone === true
-    );
-}
-
-function showA2HSBanner() {
-    if (document.getElementById("a2hs-banner")) return;
-    if (isInStandaloneMode()) return;
-    if (localStorage.getItem("a2hs-dismissed")) return;
-
-    const ios = isIOS();
-
-    const banner = document.createElement("div");
-    banner.id = "a2hs-banner";
-    banner.className = "a2hs-banner";
-
-    banner.innerHTML = `
-        <span class="a2hs-icon">📲</span>
-        <div class="a2hs-text">
-            <strong>Add to Home Screen</strong>
-            <span>${
-                ios
-                    ? 'Tap Share ↑ then "Add to Home Screen"'
-                    : "Install for quick access anytime"
-            }</span>
-        </div>
-        ${!ios ? `<button class="a2hs-install-btn">Install</button>` : ""}
-        <button class="a2hs-dismiss-btn" aria-label="Dismiss">✕</button>
-    `;
-
-    document.body.appendChild(banner);
-
-    // Trigger CSS slide-up
-    requestAnimationFrame(() => {
-        requestAnimationFrame(() =>
-            banner.classList.add("a2hs-banner--visible")
-        );
-    });
-
-    banner.querySelector(".a2hs-dismiss-btn").onclick = () => {
-        banner.classList.remove("a2hs-banner--visible");
-        setTimeout(() => banner.remove(), 350);
-        localStorage.setItem("a2hs-dismissed", "1");
-    };
-
-    if (!ios) {
-        banner.querySelector(".a2hs-install-btn").onclick = async () => {
-            if (!deferredA2HSPrompt) return;
-            deferredA2HSPrompt.prompt();
-            const { outcome } = await deferredA2HSPrompt.userChoice;
-            deferredA2HSPrompt = null;
-            banner.remove();
-        };
-    }
-}
-
-// ── Position group helper ─────────────────────────
-
-function getPositionGroup(position) {
-    const p = (position || "").toLowerCase();
-    if (
-        /forward|striker|winger|centre.forward|second.striker|\bcf\b|\bst\b|\blw\b|\brw\b|\bcam\b|\bss\b/.test(p)
-    ) return "attacker";
-    if (
-        /goalkeeper|keeper|\bgk\b/.test(p)
-    ) return "goalkeeper";
-    if (
-        /defender|back|centre.back|\bcb\b|\blb\b|\brb\b|\blwb\b|\brwb\b/.test(p)
-    ) return "defender";
-    return "midfielder";
-}
-
-// ── Tournament stats builder ──────────────────────
-
-function buildTournamentStats(players, finishedMatches, scorersByMatch) {
-
-    // Games played — counted per national team
-    const gamesByTeam = {};
-    finishedMatches.forEach(match => {
-        gamesByTeam[match.home_team_id] =
-            (gamesByTeam[match.home_team_id] || 0) + 1;
-        gamesByTeam[match.away_team_id] =
-            (gamesByTeam[match.away_team_id] || 0) + 1;
-    });
-
-    // Goals — keyed by scorer name across all matches
-    const goalsByName = {};
-    Object.values(scorersByMatch).forEach(scorers => {
-        scorers.forEach(s => {
-            goalsByName[s.name] =
-                (goalsByName[s.name] || 0) + 1;
-        });
-    });
-
-    // Clean sheets — per national team
-    const cleanSheetsByTeam = {};
-    finishedMatches.forEach(match => {
-        const awayScore = parseInt(match.away_score, 10);
-        const homeScore = parseInt(match.home_score, 10);
-        if (awayScore === 0) {
-            cleanSheetsByTeam[match.home_team_id] =
-                (cleanSheetsByTeam[match.home_team_id] || 0) + 1;
-        }
-        if (homeScore === 0) {
-            cleanSheetsByTeam[match.away_team_id] =
-                (cleanSheetsByTeam[match.away_team_id] || 0) + 1;
-        }
-    });
-
-    const stats = {};
-    players.forEach(player => {
-        stats[player.id] = {
-            gamesPlayed: gamesByTeam[player.national_team_id] || 0,
-            goals:       goalsByName[player.name] || 0,
-            cleanSheets: cleanSheetsByTeam[player.national_team_id] || 0,
-            posGroup:    getPositionGroup(player.specific_position)
-        };
-    });
-
-    return stats;
-
-}
-
 renderClubs();
 
 
@@ -323,8 +174,7 @@ const nextFiveFixtures =
         )
         .slice(0, 5);
 
-// All finished results (deduplicated, newest first)
-const allFinishedResults =
+const lastFiveResults =
     [...new Map(
         recentFixtures.map(
             fixture => [fixture.id, fixture]
@@ -334,32 +184,21 @@ const allFinishedResults =
         (a, b) =>
             new Date(b.event_date) -
             new Date(a.event_date)
-    );
+    )
+    .slice(0, 5);
 
-// Last 5 for the results display section
-const lastFiveResults = allFinishedResults.slice(0, 5);
+const scorersByMatch = {};
 
-// Fetch scorers for EVERY finished match so tournament
-// goal tallies and clean-sheet counts are complete
 const scorerResponses = await Promise.all(
-    allFinishedResults.map(
+    lastFiveResults.map(
         match => getMatchScorers(match.id)
     )
 );
 
-const scorersByMatch = {};
-allFinishedResults.forEach((match, index) => {
+lastFiveResults.forEach((match, index) => {
     scorersByMatch[match.id] =
         scorerResponses[index];
 });
-
-// Build per-player tournament stats
-const tournamentStats =
-    buildTournamentStats(
-        worldCupPlayers,
-        allFinishedResults,
-        scorersByMatch
-    );
 
 const nextFixtureByTeam = {};
 
@@ -767,40 +606,6 @@ sortedPlayers.forEach(player => {
 
     }
 
-    // Tournament stats pills
-    const s = tournamentStats[player.id] || {
-        gamesPlayed: 0, goals: 0, cleanSheets: 0, posGroup: "midfielder"
-    };
-
-    const gamesLabel =
-        s.gamesPlayed === 1 ? "Game" : "Games";
-
-    let statPillsHTML = `
-        <span class="stat-pill">
-            🎮 ${s.gamesPlayed} ${gamesLabel}
-        </span>
-    `;
-
-    if (s.posGroup === "attacker") {
-        const gLabel = s.goals === 1 ? "Goal" : "Goals";
-        statPillsHTML += `
-            <span class="stat-pill stat-pill--goal">
-                ⚽ ${s.goals} ${gLabel}
-            </span>
-        `;
-    } else if (
-        s.posGroup === "defender" ||
-        s.posGroup === "goalkeeper"
-    ) {
-        const csLabel =
-            s.cleanSheets === 1 ? "Clean Sheet" : "Clean Sheets";
-        statPillsHTML += `
-            <span class="stat-pill stat-pill--clean">
-                🧤 ${s.cleanSheets} ${csLabel}
-            </span>
-        `;
-    }
-
     card.innerHTML = `
         <h3>
             ${FLAGS[player.nationality] || "🌍"}
@@ -812,10 +617,6 @@ sortedPlayers.forEach(player => {
             •
             ${player.nationality}
         </p>
-
-        <div class="player-stats">
-            ${statPillsHTML}
-        </div>
 
         ${nextMatchHTML}
     `;
