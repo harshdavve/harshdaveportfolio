@@ -551,7 +551,133 @@ body {
     margin-left: 4px;
     vertical-align: middle;
 }
-/* ── Responsive ─────────────────────────────────── */
+/* ── Player tournament stat pills ───────────────── */
+
+.player-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+.stat-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--surface-hover);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    white-space: nowrap;
+    letter-spacing: 0.2px;
+}
+
+.stat-pill--goal {
+    background: var(--green-dim);
+    border-color: rgba(46, 204, 113, 0.3);
+    color: var(--green);
+}
+
+.stat-pill--clean {
+    background: rgba(59, 130, 246, 0.10);
+    border-color: rgba(59, 130, 246, 0.25);
+    color: #60a5fa;
+}
+
+/* ── Add to Home Screen banner ──────────────────── */
+
+.a2hs-banner {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(140px);
+    z-index: 1000;
+    background: #111c11;
+    border: 1px solid var(--border-hover);
+    border-radius: var(--radius-lg);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: min(340px, calc(100vw - 40px));
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+    opacity: 0;
+    transition:
+        transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
+        opacity 0.35s ease;
+}
+
+.a2hs-banner--visible {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+.a2hs-icon {
+    font-size: 22px;
+    flex-shrink: 0;
+}
+
+.a2hs-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.a2hs-text strong {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.a2hs-text span {
+    font-size: 0.75rem;
+    color: var(--muted);
+    line-height: 1.4;
+}
+
+.a2hs-install-btn {
+    padding: 7px 14px;
+    background: var(--green-dim);
+    border: 1px solid rgba(46, 204, 113, 0.3);
+    border-radius: 999px;
+    color: var(--green);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background var(--transition), border-color var(--transition);
+}
+
+.a2hs-install-btn:hover {
+    background: rgba(46, 204, 113, 0.22);
+    border-color: rgba(46, 204, 113, 0.5);
+}
+
+.a2hs-dismiss-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 13px;
+    cursor: pointer;
+    padding: 4px 2px;
+    flex-shrink: 0;
+    line-height: 1;
+    transition: color var(--transition);
+}
+
+.a2hs-dismiss-btn:hover {
+    color: var(--text);
+}
+
+
 
 @media (max-width: 420px) {
 
