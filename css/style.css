@@ -6,6 +6,13 @@
     box-sizing: border-box;
 }
 
+.hidden-year {
+  background: #000;
+  color: transparent;
+  border-radius: 3px;
+  padding: 0 4px;
+}
+
 body {
     --primary-color: #4fc6ce;
     --accent-01:     #DBDBDB;
