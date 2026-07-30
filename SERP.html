@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brand Monitor - Trigger</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .card {
+            background: white;
+            padding: 2rem 3rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        h1 { color: #2c3e50; }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 40px;
+            font-size: 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover { background: #2980b9; }
+        button:disabled { background: #95a5a6; cursor: not-allowed; }
+        #status { margin-top: 20px; font-weight: bold; }
+        .success { color: #27ae60; }
+        .error { color: #e74c3c; }
+        .loading { color: #f39c12; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>📊 Brand Monitor</h1>
+        <p>Click the button to run the analysis now. You'll receive the report via email.</p>
+        <button id="runBtn">▶ Run Analysis</button>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        document.getElementById('runBtn').addEventListener('click', function() {
+            const btn = this;
+            const statusDiv = document.getElementById('status');
+            
+            btn.disabled = true;
+            statusDiv.className = 'loading';
+            statusDiv.textContent = '⏳ Running analysis... (may take 1-2 minutes)';
+
+            // Your PythonAnywhere webhook URL
+            const webhookUrl = 'https://harshdave2800.pythonanywhere.com/run-script';
+            const secretToken = 'MySup3rSecr3t!2025';  // Must match .env on PythonAnywhere 
+
+
+            fetch(webhookUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Trigger-Token': secretToken
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        throw new Error(data.error || 'Server error');
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                statusDiv.className = 'success';
+                statusDiv.textContent = '✅ Analysis triggered successfully! Check your email in a few minutes.';
+                console.log('Output:', data.stdout);
+            })
+            .catch(error => {
+                statusDiv.className = 'error';
+                statusDiv.textContent = '❌ Error: ' + error.message;
+            })
+            .finally(() => {
+                btn.disabled = false;
+            });
+        });
+    </script>
+</body>
+</html>
