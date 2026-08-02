@@ -71,19 +71,13 @@
     background: var(--blue-dim);
     border:1px solid #c3d7fb;
     border-radius:12px;
-    padding:12px 14px;
+    padding:10px 14px;
     margin-bottom:12px;
-    display:flex;
-    flex-direction:column;
-    gap:10px;
-    font-size:12.5px;
-    color:#1c3f8f;
-  }
-  .banner-text{
     display:flex;
     align-items:center;
     gap:8px;
-    flex-wrap:wrap;
+    font-size:12.5px;
+    color:#1c3f8f;
   }
   .banner .pill{
     flex-shrink:0;
@@ -97,21 +91,73 @@
     padding:3px 8px;
     border-radius:20px;
   }
-  .banner .interest-link{
-    display:inline-flex;
-    align-self:flex-start;
+
+  /* ---------- Interest modal ---------- */
+  .modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(18,20,26,.45);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    z-index:100;
+  }
+  .modal-overlay.show{ display:flex; }
+  .modal{
+    position:relative;
+    width:100%;
+    max-width:340px;
+    background:#fff;
+    border-radius:14px;
+    padding:26px 24px 22px;
+    box-shadow: 0 30px 60px -20px rgba(18,20,26,.35);
+    text-align:center;
+  }
+  .modal-close{
+    position:absolute;
+    top:10px;
+    right:10px;
+    width:26px; height:26px;
+    border:none;
+    background:transparent;
+    color:var(--muted);
+    font-size:16px;
+    line-height:1;
+    cursor:pointer;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    transition: background .15s ease, color .15s ease;
+  }
+  .modal-close:hover{ background:#f1f1ee; color:var(--ink); }
+  .modal-title{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size:16.5px;
+    margin-bottom:8px;
+  }
+  .modal-sub{
+    font-size:12.5px;
+    color:var(--muted);
+    line-height:1.55;
+    margin-bottom:18px;
+  }
+  .modal-cta{
+    display:inline-block;
+    width:100%;
     font-family:'Space Grotesk', sans-serif;
     font-weight:600;
-    font-size:11.5px;
+    font-size:13px;
     color:#fff;
     background: var(--blue);
-    padding:6px 12px;
-    border-radius:20px;
+    padding:10px 16px;
+    border-radius:9px;
     text-decoration:none;
-    white-space:nowrap;
     transition: background .2s ease;
   }
-  .banner .interest-link:hover{ background:#1f57c9; }
+  .modal-cta:hover{ background:#1f57c9; }
 
   /* ---------- Explainer ---------- */
   .explainer{
@@ -354,11 +400,8 @@
 <body>
 
   <div class="banner">
-    <div class="banner-text">
-      <span class="pill">Coming soon</span>
-      <span>Full version will support <strong style="color:#1c3f8f;">multiple keywords</strong>, <strong style="color:#1c3f8f;">multiple locations</strong>, and <strong style="color:#1c3f8f;">scheduled scans</strong> — this is a single-keyword preview.</span>
-    </div>
-    <a class="interest-link" href="https://docs.google.com/forms/d/e/1FAIpQLSd0k8bDxmxoKb7C8iHV1Qs1_ZbOQE3P3w1mJXINvdeGGPqPJA/viewform?usp=publish-editor" target="_blank" rel="noopener">Interested? Register here →</a>
+    <span class="pill">Coming soon</span>
+    <span>Full version will support <strong style="color:#1c3f8f;">multiple keywords</strong>, <strong style="color:#1c3f8f;">multiple locations</strong>, and <strong style="color:#1c3f8f;">scheduled scans</strong> — this is a single-keyword preview.</span>
   </div>
 
   <div class="card">
@@ -408,6 +451,15 @@
     <div class="credit">Made with ❤️ and vibe coding by <a href="https://twitter.com/DammitArsenal" target="_blank" rel="noopener">@DammitArsenal</a></div>
   </div>
 
+  <div class="modal-overlay" id="interestOverlay">
+    <div class="modal">
+      <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
+      <div class="modal-title">Interested in the full version?</div>
+      <div class="modal-sub">Register your interest or share feedback — it takes less than a minute.</div>
+      <a class="modal-cta" id="modalCta" href="https://docs.google.com/forms/d/e/1FAIpQLSd0k8bDxmxoKb7C8iHV1Qs1_ZbOQE3P3w1mJXINvdeGGPqPJA/viewform?usp=publish-editor" target="_blank" rel="noopener">Register interest →</a>
+    </div>
+  </div>
+
 <script>
 (function(){
   const btn = document.getElementById('runBtn');
@@ -419,6 +471,20 @@
   const keywordInput = document.getElementById('keyword');
   const locationInput = document.getElementById('location');
   const emailInput = document.getElementById('email');
+
+  const interestOverlay = document.getElementById('interestOverlay');
+  const modalClose = document.getElementById('modalClose');
+
+  function showInterestModal(){ interestOverlay.classList.add('show'); }
+  function hideInterestModal(){ interestOverlay.classList.remove('show'); }
+
+  modalClose.addEventListener('click', hideInterestModal);
+  interestOverlay.addEventListener('click', function(e){
+    if (e.target === interestOverlay) hideInterestModal();
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Escape') hideInterestModal();
+  });
 
   const webhookUrl = 'https://harshdave28000.pythonanywhere.com/run-script';  // update to your new domain
 
@@ -479,6 +545,7 @@
       setStatus('ok', 'Complete');
       trace.classList.remove('scanning');
       console.log('Output:', data.stdout);
+      setTimeout(showInterestModal, 600);
     })
     .catch(error => {
       addLine('error — ' + error.message, 'err');
