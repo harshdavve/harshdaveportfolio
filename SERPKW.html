@@ -3,7 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Brand Monitor · Multi‑user</title>
+<title>Brand Keyword Monitor — Check Who's Bidding on Your Brand Name | Free Google Ads Tool</title>
+<meta name="description" content="Free tool to check if competitors are bidding on your brand keywords on Google Ads. Protect your brand CPC, catch competitor ads on your name, and get a report emailed to you in minutes.">
+<meta name="keywords" content="brand keyword monitoring, brand bidding, competitor ads on brand name, Google Ads brand protection, PPC brand terms, CPC protection, trademark bidding Google Ads">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://harshdave28000.pythonanywhere.com/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Brand Keyword Monitor — Check Who's Bidding on Your Brand Name">
+<meta property="og:description" content="Free tool to check if competitors are bidding on your brand keywords on Google Ads. Get a report emailed to you in minutes.">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Brand Keyword Monitor — Check Who's Bidding on Your Brand Name">
+<meta name="twitter:description" content="See who's bidding on your brand keywords on Google Ads and protect your CPC.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -28,6 +38,7 @@
     background: var(--bg);
     color: var(--ink);
     display:flex;
+    flex-direction:column;
     align-items:center;
     justify-content:center;
     min-height:100vh;
@@ -36,13 +47,77 @@
 
   .card{
     width:100%;
-    max-width:480px;
+    max-width:520px;
     background: var(--card);
     border:1px solid var(--line);
     border-radius:16px;
     padding:28px 26px 24px;
     box-shadow: 0 24px 48px -28px rgba(18,20,26,.18);
   }
+
+  /* ---------- Coming soon banner ---------- */
+  .banner{
+    width:100%;
+    max-width:520px;
+    background: var(--blue-dim);
+    border:1px solid #c3d7fb;
+    border-radius:12px;
+    padding:10px 14px;
+    margin-bottom:12px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:12.5px;
+    color:#1c3f8f;
+  }
+  .banner .pill{
+    flex-shrink:0;
+    background: var(--blue);
+    color:#fff;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:10px;
+    letter-spacing:.03em;
+    text-transform:uppercase;
+    padding:3px 8px;
+    border-radius:20px;
+  }
+
+  /* ---------- Explainer ---------- */
+  .explainer{
+    background:#fcfcfb;
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:16px 16px;
+    margin-bottom:18px;
+  }
+  .explainer .ex-title{
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+    margin-bottom:8px;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .explainer p{
+    font-size:12.5px;
+    line-height:1.6;
+    color:#3d3f47;
+    margin:0 0 8px;
+  }
+  .explainer p:last-child{ margin-bottom:0; }
+  .explainer ul{
+    margin:0 0 8px;
+    padding-left:18px;
+  }
+  .explainer li{
+    font-size:12.5px;
+    line-height:1.6;
+    color:#3d3f47;
+    margin-bottom:4px;
+  }
+  .explainer strong{ color:var(--ink); }
 
   .top{
     display:flex;
@@ -248,6 +323,11 @@
 </head>
 <body>
 
+  <div class="banner">
+    <span class="pill">Coming soon</span>
+    <span>Full version will support <strong style="color:#1c3f8f;">multiple keywords</strong>, <strong style="color:#1c3f8f;">multiple locations</strong>, and <strong style="color:#1c3f8f;">scheduled scans</strong> — this is a single-keyword preview.</span>
+  </div>
+
   <div class="card">
     <div class="top">
       <div>
@@ -255,6 +335,17 @@
         <div class="sub">Check Google Ads for any keyword</div>
       </div>
       <div class="status idle" id="status"><span class="lamp"></span><span id="statusLabel">Idle</span></div>
+    </div>
+
+    <div class="explainer">
+      <div class="ex-title">Why this matters</div>
+      <p>Your brand keywords should always be <strong>protected</strong>. If a competitor bids on your brand name, it drives up your CPC and hands them clicks that should be yours — brand terms convert at the highest ROI of any keyword, so losing that traffic is costly.</p>
+      <p>What to do if you find someone bidding on your name:</p>
+      <ul>
+        <li>No agreement yet? Reach out and propose a <strong>mutual non-bidding pact</strong> — neither side bids on the other's brand terms.</li>
+        <li>Already have a pact but still see their ad? Copy the tracking link from their ad and send them the <strong>exact campaign</strong> so they can pause it.</li>
+      </ul>
+      <p>Enter a keyword below to see who's currently bidding on it.</p>
     </div>
 
     <!-- Form -->
@@ -297,7 +388,6 @@
   const emailInput = document.getElementById('email');
 
   const webhookUrl = 'https://harshdave28000.pythonanywhere.com/run-script';  // update to your new domain
-  const secretToken = 'MySup3rSecr3t!2025';  // must match .env on PythonAnywhere
 
   function setStatus(state, label){
     status.className = 'status ' + state;
@@ -333,8 +423,7 @@
     fetch(webhookUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'X-Trigger-Token': secretToken
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
     })
