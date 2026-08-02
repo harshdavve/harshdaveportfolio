@@ -97,13 +97,22 @@
     position:fixed;
     inset:0;
     background:rgba(18,20,26,.45);
-    display:none;
+    backdrop-filter: blur(2px);
+    display:flex;
     align-items:center;
     justify-content:center;
     padding:24px;
     z-index:100;
+    opacity:0;
+    visibility:hidden;
+    pointer-events:none;
+    transition: opacity .35s ease, visibility .35s ease;
   }
-  .modal-overlay.show{ display:flex; }
+  .modal-overlay.show{
+    opacity:1;
+    visibility:visible;
+    pointer-events:auto;
+  }
   .modal{
     position:relative;
     width:100%;
@@ -113,6 +122,13 @@
     padding:26px 24px 22px;
     box-shadow: 0 30px 60px -20px rgba(18,20,26,.35);
     text-align:center;
+    transform: translateY(14px) scale(.96);
+    opacity:0;
+    transition: transform .4s cubic-bezier(.2,.85,.3,1.15), opacity .3s ease;
+  }
+  .modal-overlay.show .modal{
+    transform: translateY(0) scale(1);
+    opacity:1;
   }
   .modal-close{
     position:absolute;
@@ -389,6 +405,7 @@
     .status.busy .lamp{ animation:none; }
     .cursor{ animation:none; }
     .log-line{ animation:none; opacity:1; }
+    .modal-overlay, .modal{ transition:none; }
   }
 
   @media (max-width:480px){
@@ -454,8 +471,8 @@
   <div class="modal-overlay" id="interestOverlay">
     <div class="modal">
       <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
-      <div class="modal-title">Interested in the full version?</div>
-      <div class="modal-sub">Register your interest or share feedback — it takes less than a minute.</div>
+      <div class="modal-title">Your report is on its way!</div>
+      <div class="modal-sub">We've sent it to your email. Would you like to register your interest in the full version, or share feedback?</div>
       <a class="modal-cta" id="modalCta" href="https://docs.google.com/forms/d/e/1FAIpQLSd0k8bDxmxoKb7C8iHV1Qs1_ZbOQE3P3w1mJXINvdeGGPqPJA/viewform?usp=publish-editor" target="_blank" rel="noopener">Register interest →</a>
     </div>
   </div>
@@ -545,7 +562,7 @@
       setStatus('ok', 'Complete');
       trace.classList.remove('scanning');
       console.log('Output:', data.stdout);
-      setTimeout(showInterestModal, 600);
+      setTimeout(showInterestModal, 3000); // delay before the interest modal appears, in ms
     })
     .catch(error => {
       addLine('error — ' + error.message, 'err');
