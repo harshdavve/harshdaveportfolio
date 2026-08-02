@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-R42J6R8P91"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-R42J6R8P91');
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Brand Keyword Monitor — Check Who's Bidding on Your Brand Name | Free Google Ads Tool</title>
@@ -62,13 +71,19 @@
     background: var(--blue-dim);
     border:1px solid #c3d7fb;
     border-radius:12px;
-    padding:10px 14px;
+    padding:12px 14px;
     margin-bottom:12px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    font-size:12.5px;
+    color:#1c3f8f;
+  }
+  .banner-text{
     display:flex;
     align-items:center;
     gap:8px;
-    font-size:12.5px;
-    color:#1c3f8f;
+    flex-wrap:wrap;
   }
   .banner .pill{
     flex-shrink:0;
@@ -82,6 +97,21 @@
     padding:3px 8px;
     border-radius:20px;
   }
+  .banner .interest-link{
+    display:inline-flex;
+    align-self:flex-start;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:11.5px;
+    color:#fff;
+    background: var(--blue);
+    padding:6px 12px;
+    border-radius:20px;
+    text-decoration:none;
+    white-space:nowrap;
+    transition: background .2s ease;
+  }
+  .banner .interest-link:hover{ background:#1f57c9; }
 
   /* ---------- Explainer ---------- */
   .explainer{
@@ -324,8 +354,11 @@
 <body>
 
   <div class="banner">
-    <span class="pill">Coming soon</span>
-    <span>Full version will support <strong style="color:#1c3f8f;">multiple keywords</strong>, <strong style="color:#1c3f8f;">multiple locations</strong>, and <strong style="color:#1c3f8f;">scheduled scans</strong> — this is a single-keyword preview.</span>
+    <div class="banner-text">
+      <span class="pill">Coming soon</span>
+      <span>Full version will support <strong style="color:#1c3f8f;">multiple keywords</strong>, <strong style="color:#1c3f8f;">multiple locations</strong>, and <strong style="color:#1c3f8f;">scheduled scans</strong> — this is a single-keyword preview.</span>
+    </div>
+    <a class="interest-link" href="https://docs.google.com/forms/d/e/1FAIpQLSd0k8bDxmxoKb7C8iHV1Qs1_ZbOQE3P3w1mJXINvdeGGPqPJA/viewform?usp=publish-editor" target="_blank" rel="noopener">Interested? Register here →</a>
   </div>
 
   <div class="card">
