@@ -1,15 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-R42J6R8P91"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-R42J6R8P91');
-</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Brand Keyword Monitor — Check Who's Bidding on Your Brand Name | Free Google Ads Tool</title>
@@ -286,6 +277,32 @@
     box-shadow:0 0 0 3px rgba(47,111,237,.15);
   }
 
+  .deliver-toggle{
+    display:flex;
+    gap:8px;
+  }
+  .deliver-opt{
+    flex:1;
+    padding:9px 12px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:#fcfcfb;
+    font-family:'Inter', sans-serif;
+    font-size:13px;
+    font-weight:500;
+    color:var(--muted);
+    cursor:pointer;
+    transition: border .15s ease, background .15s ease, color .15s ease;
+  }
+  .deliver-opt:hover{ border-color:#c7cad1; }
+  .deliver-opt.active{
+    border-color:var(--blue);
+    background:var(--blue-dim);
+    color:var(--blue);
+    font-weight:600;
+  }
+  #emailGroup.hidden{ display:none; }
+
   .trace-wrap{
     position:relative;
     height:80px;
@@ -451,6 +468,13 @@
       <input type="text" id="location" placeholder="City, Country (default: India)" value="Mumbai, India">
     </div>
     <div class="form-group">
+      <label>Get the report by</label>
+      <div class="deliver-toggle">
+        <button type="button" class="deliver-opt active" data-deliver="email" id="deliverEmailBtn">Email</button>
+        <button type="button" class="deliver-opt" data-deliver="download" id="deliverDownloadBtn">Download</button>
+      </div>
+    </div>
+    <div class="form-group" id="emailGroup">
       <label for="email">Your Email *</label>
       <input type="email" id="email" placeholder="you@example.com" value="">
     </div>
@@ -461,18 +485,18 @@
     </div>
 
     <div class="log" id="log" aria-live="polite">
-      <div class="log-line" style="animation-delay:.05s"><span class="tag">›</span><span>enter a keyword and your email, then click Run<span class="cursor"></span></span></div>
+      <div class="log-line" style="animation-delay:.05s"><span class="tag">›</span><span>enter a keyword, choose delivery, then click Run<span class="cursor"></span></span></div>
     </div>
 
-    <div class="foot">Report sent to your email · usually 1–2 min</div>
+    <div class="foot" id="footNote">Report sent to your email · usually 1–2 min</div>
     <div class="credit">Made with ❤️ and vibe coding by <a href="https://twitter.com/DammitArsenal" target="_blank" rel="noopener">@DammitArsenal</a></div>
   </div>
 
   <div class="modal-overlay" id="interestOverlay">
     <div class="modal">
       <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
-      <div class="modal-title">Your report is on its way!</div>
-      <div class="modal-sub">We've sent it to your email. Would you like to register your interest in the full version, or share feedback?</div>
+      <div class="modal-title" id="modalTitle">Your report is on its way!</div>
+      <div class="modal-sub" id="modalSub">We've sent it to your email. Would you like to register your interest in the full version, or share feedback?</div>
       <a class="modal-cta" id="modalCta" href="https://docs.google.com/forms/d/e/1FAIpQLSd0k8bDxmxoKb7C8iHV1Qs1_ZbOQE3P3w1mJXINvdeGGPqPJA/viewform?usp=publish-editor" target="_blank" rel="noopener">Register interest →</a>
     </div>
   </div>
@@ -488,6 +512,28 @@
   const keywordInput = document.getElementById('keyword');
   const locationInput = document.getElementById('location');
   const emailInput = document.getElementById('email');
+  const emailGroup = document.getElementById('emailGroup');
+  const footNote = document.getElementById('footNote');
+  const deliverEmailBtn = document.getElementById('deliverEmailBtn');
+  const deliverDownloadBtn = document.getElementById('deliverDownloadBtn');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalSub = document.getElementById('modalSub');
+
+  let deliver = 'email';
+
+  function setDeliver(mode){
+    deliver = mode;
+    const isEmail = mode === 'email';
+    deliverEmailBtn.classList.toggle('active', isEmail);
+    deliverDownloadBtn.classList.toggle('active', !isEmail);
+    emailGroup.classList.toggle('hidden', !isEmail);
+    footNote.textContent = isEmail
+      ? 'Report sent to your email · usually 1–2 min'
+      : 'Report downloads straight to your device · usually 1–2 min';
+  }
+
+  deliverEmailBtn.addEventListener('click', () => setDeliver('email'));
+  deliverDownloadBtn.addEventListener('click', () => setDeliver('download'));
 
   const interestOverlay = document.getElementById('interestOverlay');
   const modalClose = document.getElementById('modalClose');
@@ -520,13 +566,29 @@
 
   function clearLog(){ log.innerHTML = ''; }
 
+  function triggerDownload(html, keyword){
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const safeKeyword = keyword.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'brand-monitor-' + (safeKeyword || 'report') + '.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   btn.addEventListener('click', function(){
     const keyword = keywordInput.value.trim();
     const location = locationInput.value.trim() || 'India';
     const email = emailInput.value.trim();
 
     if (!keyword) { alert('Please enter a keyword.'); return; }
-    if (!email || !email.includes('@')) { alert('Please enter a valid email address.'); return; }
+    if (deliver === 'email' && (!email || !email.includes('@'))) {
+      alert('Please enter a valid email address, or switch to Download.');
+      return;
+    }
 
     btn.disabled = true;
     trace.classList.add('scanning');
@@ -534,7 +596,8 @@
     clearLog();
     addLine('sending request for: ' + keyword, 'busy');
 
-    const payload = { keyword, location, email };
+    const payload = { keyword, location, deliver };
+    if (email) payload.email = email;
 
     fetch(webhookUrl, {
       method: 'POST',
@@ -558,7 +621,18 @@
     })
     .then(data => {
       const stamp = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-      addLine('scan complete — report sent to ' + email + ' at ' + stamp, 'ok');
+
+      if (deliver === 'download' && data.report_html) {
+        triggerDownload(data.report_html, keyword);
+        addLine('scan complete — report downloaded at ' + stamp, 'ok');
+        modalTitle.textContent = 'Your report downloaded!';
+        modalSub.textContent = 'Would you like to register your interest in the full version, or share feedback?';
+      } else {
+        addLine('scan complete — report sent to ' + email + ' at ' + stamp, 'ok');
+        modalTitle.textContent = 'Your report is on its way!';
+        modalSub.textContent = "We've sent it to your email. Would you like to register your interest in the full version, or share feedback?";
+      }
+
       setStatus('ok', 'Complete');
       trace.classList.remove('scanning');
       console.log('Output:', data.stdout);
