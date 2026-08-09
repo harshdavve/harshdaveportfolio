@@ -567,17 +567,28 @@
 
   function clearLog(){ log.innerHTML = ''; }
 
-  function triggerDownload(html, keyword){
+  let currentReportUrl = null;
+
+  function showReportLink(html, keyword){
+    if (currentReportUrl) URL.revokeObjectURL(currentReportUrl);
     const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
+    currentReportUrl = URL.createObjectURL(blob);
     const safeKeyword = keyword.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'brand-monitor-' + (safeKeyword || 'report') + '.html';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'log-line';
+    wrap.style.marginTop = '4px';
+    wrap.innerHTML =
+      '<span class="tag">›</span>' +
+      '<span style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">' +
+        '<a href="' + currentReportUrl + '" target="_blank" rel="noopener" ' +
+          'style="display:inline-flex;align-items:center;gap:6px;font-weight:600;color:#2f6fed;text-decoration:none;border:1px solid #dbe6fd;background:#dbe6fd;padding:5px 12px;border-radius:20px;">' +
+          'Open your report &rarr;</a>' +
+        '<a href="' + currentReportUrl + '" download="brand-monitor-' + (safeKeyword || 'report') + '.html" ' +
+          'style="font-size:11.5px;color:#74767e;text-decoration:underline;">save file instead</a>' +
+      '</span>';
+    log.appendChild(wrap);
+    log.scrollTop = log.scrollHeight;
   }
 
   btn.addEventListener('click', function(){
@@ -624,10 +635,10 @@
       const stamp = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
 
       if (deliver === 'download' && data.report_html) {
-        triggerDownload(data.report_html, keyword);
-        addLine('scan complete — report downloaded at ' + stamp, 'ok');
-        modalTitle.textContent = 'Your report downloaded!';
-        modalSub.textContent = 'Would you like to register your interest in the full version, or share feedback?';
+        addLine('scan complete — report ready at ' + stamp, 'ok');
+        showReportLink(data.report_html, keyword);
+        modalTitle.textContent = 'Your report is ready!';
+        modalSub.textContent = 'Tap "Open your report" above to view it. Would you like to register your interest in the full version, or share feedback?';
       } else {
         addLine('scan complete — report sent to ' + email + ' at ' + stamp, 'ok');
         modalTitle.textContent = 'Your report is on its way!';
