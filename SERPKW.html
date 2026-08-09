@@ -571,6 +571,14 @@
 
   function showReportLink(html, keyword){
     if (currentReportUrl) URL.revokeObjectURL(currentReportUrl);
+
+    // Safari on iOS sometimes ignores the responsive viewport meta tag for
+    // blob: URLs opened in a new tab, making the page render "zoomed in"
+    // at native scale instead of scaling to fit the screen. A data: URI
+    // doesn't have that issue, so use it for the link people actually tap
+    // to view the report. Keep blob: for the file-save link, since that's
+    // just written to disk, not rendered, so the quirk doesn't apply there.
+    const dataUrl = 'data:text/html;charset=utf-8,' + encodeURIComponent(html);
     const blob = new Blob([html], { type: 'text/html' });
     currentReportUrl = URL.createObjectURL(blob);
     const safeKeyword = keyword.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -581,7 +589,7 @@
     wrap.innerHTML =
       '<span class="tag">›</span>' +
       '<span style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">' +
-        '<a href="' + currentReportUrl + '" target="_blank" rel="noopener" ' +
+        '<a href="' + dataUrl + '" target="_blank" rel="noopener" ' +
           'style="display:inline-flex;align-items:center;gap:6px;font-weight:600;color:#2f6fed;text-decoration:none;border:1px solid #dbe6fd;background:#dbe6fd;padding:5px 12px;border-radius:20px;">' +
           'Open your report &rarr;</a>' +
         '<a href="' + currentReportUrl + '" download="brand-monitor-' + (safeKeyword || 'report') + '.html" ' +
