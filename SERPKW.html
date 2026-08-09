@@ -571,11 +571,6 @@
 
   function showReportLink(html, keyword){
     if (currentReportUrl) URL.revokeObjectURL(currentReportUrl);
-
-    // Note: data: URIs seem appealing here, but Safari blocks top-level
-    // navigation to data: URLs outright (an anti-phishing restriction), so
-    // a tap on a data: href silently does nothing on iOS. blob: URLs don't
-    // have that restriction and open normally, so use blob: for both links.
     const blob = new Blob([html], { type: 'text/html' });
     currentReportUrl = URL.createObjectURL(blob);
     const safeKeyword = keyword.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
